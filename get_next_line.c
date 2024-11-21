@@ -1,5 +1,41 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   get_next_line.c                                    :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: ryada <ryada@student.42.fr>                +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2024/11/20 12:17:42 by ryada             #+#    #+#             */
+/*   Updated: 2024/11/21 15:33:08 by ryada            ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "get_next_line.h"
-#define BUFFER_SIZE 42
+
+char *get_next_line(int fd)
+{
+    static char *stored_data;
+    char buffer[BUFFER_SIZE];
+    ssize_t bytes_read; //bc it can be negative when there is an error
+    int newline_start;
+    char *current_line;
+    
+    if (fd < 0 || BUFFER_SIZE <= 0)
+        return (NULL);
+    while ((bytes_read = read(fd, buffer, BUFFER_SIZE)) > 0)
+    {
+        buffer[bytes_read] = '\0';
+        stored_data = ft_strjoin(stored_data, buffer);
+        newline_start = ft_find_new_line(buffer);
+        if (newline_start >= 0)
+        {
+            
+        }
+        if (buffer == '\n')
+            not_printed = buffer;
+    }
+    
+}
 
 int main(void)
 {
