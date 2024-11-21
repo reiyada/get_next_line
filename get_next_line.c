@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   get_next_line.c                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ryada <ryada@student.42.fr>                +#+  +:+       +#+        */
+/*   By: rei <rei@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/20 12:17:42 by ryada             #+#    #+#             */
-/*   Updated: 2024/11/21 15:33:08 by ryada            ###   ########.fr       */
+/*   Updated: 2024/11/22 00:44:13 by rei              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,53 +14,101 @@
 
 char *get_next_line(int fd)
 {
-    static char *stored_data;
-    char buffer[BUFFER_SIZE];
+    static char *remained_data;
+    char buffer[BUFFER_SIZE + 1];
     ssize_t bytes_read; //bc it can be negative when there is an error
-    int newline_start;
+    int line_end;
     char *current_line;
+    char *temp;
     
     if (fd < 0 || BUFFER_SIZE <= 0)
         return (NULL);
+    if (!remained_data)
+    {
+        remained_data = (char *)malloc(1);
+        if (!remained_data)
+            return NULL;
+        remained_data[0] = '\0';
+    }
     while ((bytes_read = read(fd, buffer, BUFFER_SIZE)) > 0)
     {
         buffer[bytes_read] = '\0';
-        stored_data = ft_strjoin(stored_data, buffer);
-        newline_start = ft_find_new_line(buffer);
-        if (newline_start >= 0)
+        temp = remained_data;
+        remained_data = ft_strjoin(remained_data, buffer);
+        free (temp);
+        while ((line_end = ft_find_line_end(remained_data)) >= 0)
         {
-            
+            current_line = ft_extract_current_line(remained_data, line_end);
+            remained_data = ft_update_data(remained_data, line_end);
+            return current_line;
         }
-        if (buffer == '\n')
-            not_printed = buffer;
     }
-    
+    if (bytes_read < 0)
+    {
+        ft_free_remained_data(&remained_data);
+        return NULL;
+    }
+    if (remained_data && *remained_data)
+    {
+        current_line = remained_data;
+        remained_data = NULL;
+        return current_line;
+    }
+    ft_free_remained_data(&remained_data);
+    return NULL;
 }
 
-int main(void)
-{
-    int fd;
-    char buffer[BUFFER_SIZE];
-    ssize_t bytes_read;
+// int main(void)
+// {
+//     int fd = open("test.txt", O_RDONLY);
+//     if (fd < 0)
+//     {
+//         perror("Error opening file");
+//         return 1;
+//     }
 
-    fd = open("test.txt",O_RDONLY);
-    if (fd == -1)
-    {
-        perror("Error opening file");
-        return (-1);
-    }
-    while ((bytes_read = read(fd, buffer, BUFFER_SIZE)) > 0)
-        write (STDOUT_FILENO, buffer, bytes_read);
-    if (bytes_read == -1)
-    {
-        perror("Error reading file");
-        close(fd);
-        return (-1);
-    }
-    close(fd);
-    printf("\nFile closed successfully.\n");
-    return (0);
-}
+//     char *line;
+//     while ((line = get_next_line(fd)) != NULL)
+//     {
+//         printf("%s", line);
+//         free(line); // Free the allocated memory after use
+//     }
+
+//     close(fd);
+//     return 0;
+// }
+
+// int main(void)
+// {
+//     int fd;
+//     char buffer[BUFFER_SIZE];
+//     ssize_t bytes_read;
+//     char *new_line;
+
+//     fd = open("test.txt",O_RDONLY);
+//     if (fd < 0)
+//     {
+//         perror("Error opening the file\n");
+//         return (-1);
+//     }
+//     if ((bytes_read = read(fd, buffer, BUFFER_SIZE) > 0))
+//     {
+//         new_line = get_next_line(fd);
+//         printf("%s\n", new_line);
+//         free(new_line);
+//     }
+//     else if (bytes_read == 0)
+//     {
+//         printf("The file has been printed successfully!\n");
+//     }
+//     else
+//     {
+//         perror("Error reading the file\n");
+//         return (-1);
+//     }
+//     close(fd);
+//     return (0);
+// }
 
 // read(fd, buffer, BUFFER_SIZE):
 
