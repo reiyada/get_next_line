@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   get_next_line_utils.c                              :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: rei <rei@student.42.fr>                    +#+  +:+       +#+        */
+/*   By: ryada <ryada@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/20 12:17:46 by ryada             #+#    #+#             */
-/*   Updated: 2024/11/25 12:23:43 by rei              ###   ########.fr       */
+/*   Updated: 2024/11/25 15:37:49 by ryada            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,11 +16,36 @@ size_t	ft_strlen(const char *str)
 {
 	size_t	i;
 
-	i = 0;
+    i = 0;
+    if (!str)
+    {
+        return (0);
+    }
 	while (str[i])
 		i++;
 	return (i);
 }
+
+size_t ft_strlcpy(char *dst, const char *src, size_t dstsize)
+{
+    size_t i;
+
+    i = 0;
+    if (!src)
+        return (0);
+    if (dstsize > 0)
+    {
+        while (src[i] && i < dstsize - 1)
+        {
+            dst[i] = src[i];
+            i++;
+        }
+        dst[i] = '\0';
+    }
+    return (ft_strlen(src));
+}
+
+
 
 char *ft_strjoin(char const *s1, char const *s2)
 {
@@ -41,15 +66,23 @@ char *ft_strjoin(char const *s1, char const *s2)
         return (NULL);
     i = 0;
     if (s1)
+    {
         while (i < len1)
         {
             result[i] = s1[i];
             i++;
         }
+    }
     j = 0;
     if (s2)
+    {
         while (j < len2)
-            result[i++] = s2[j++];
+        {
+            result[i] = s2[j];
+            i++;
+            j++;
+        }
+    }
     result[i] = '\0';
     return (result);
 }
@@ -65,9 +98,7 @@ int ft_find_line_end(char *str)
     while (str[i])
     {
         if(str[i] == '\n')
-        {
             return (i);
-        }
         i++;
     }
     return (-1);
@@ -76,67 +107,19 @@ int ft_find_line_end(char *str)
 char *ft_extract_current_line(char *str)
 {
     char *current_line;
-    int i;
     int end;
 
-    i = 0;
+    if (!str || *str == '\0')
+        return (NULL);
     end = ft_find_line_end(str);
     if (end == -1)
         end = ft_strlen(str);
     current_line = (char *)malloc(sizeof(char) * (end + 2));
     if (!current_line)
         return (NULL);
-    while (i < end && str[i])
-    {
-        current_line[i] = str[i];
-        i++;
-    }
-    if (str[i] == '\n')
-        current_line[i++] = '\n';
-    current_line[i] = '\0';
+    ft_strlcpy(current_line, str, end + 2);
     return (current_line);
 }
-
-// char *ft_extract_current_line(char *str, int line_end)
-// {
-//     char *current_line;
-//     int i;
-    
-//     current_line = (char *)malloc(sizeof(char) * (line_end + 1));
-//     if (!current_line)
-//         return (NULL);
-//     i = 0;
-//     while (i <= line_end)
-//     {
-//         current_line[i] = str[i];
-//         i++;
-//     }
-//     current_line[i] = '\0';
-//     return (current_line);
-// }
-
-// char *ft_update_data(char *remained_data, int line_end)
-// {
-//     int i;
-//     char *new_data;
-
-//     if (!remained_data || !remained_data[line_end + 1])
-//     {
-//         free(remained_data);
-//         return (NULL);
-//     }
-//     new_data = (char *)malloc(ft_strlen(remained_data + line_end + 1) + 1);
-//     if (!new_data)
-//         return (NULL);
-//     line_end++;
-//     i = 0;
-//     while (remained_data[line_end + 1])
-//         new_data[i++] = remained_data[line_end++];
-//     new_data[i] = '\0';
-//     free(remained_data);
-//     return (new_data);
-// }
-
 
 char *ft_update_data(char *remainder)
 {
@@ -144,20 +127,20 @@ char *ft_update_data(char *remainder)
     int end;
     int i;
     
-    end = ft_find_line_end(remainder);
-    if (end == -1)
-    {
-        free(remainder);
+    if (!remainder)
         return (NULL);
-    }
-    if (remainder[end + 1] == '\0')
+    end = ft_find_line_end(remainder);
+    if (end == -1 || remainder[end + 1] == '\0')
     {
         free(remainder);
         return (NULL);
     }
     new_remainder = (char *)malloc(sizeof(char) * (ft_strlen(remainder) - end));
     if (!new_remainder)
+    {
+        free (remainder);
         return (NULL);
+    }
     i = 0;
     end++;
     while (remainder[end])

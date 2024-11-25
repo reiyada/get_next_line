@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   get_next_line.h                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: rei <rei@student.42.fr>                    +#+  +:+       +#+        */
+/*   By: ryada <ryada@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/20 12:17:39 by ryada             #+#    #+#             */
-/*   Updated: 2024/11/22 14:01:55 by rei              ###   ########.fr       */
+/*   Updated: 2024/11/25 15:08:57 by ryada            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,6 +29,7 @@ char *ft_update_data(char *str);
 int     ft_find_line_end(char *str);
 
 size_t	ft_strlen(const char *str);
+size_t ft_strlcpy(char *dst, const char *src, size_t dstsize);
 
 // void ft_free_remained_data(char **data);
 

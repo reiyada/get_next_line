@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   get_next_line.c                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: rei <rei@student.42.fr>                    +#+  +:+       +#+        */
+/*   By: ryada <ryada@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/20 12:17:42 by ryada             #+#    #+#             */
-/*   Updated: 2024/11/25 12:21:41 by rei              ###   ########.fr       */
+/*   Updated: 2024/11/25 15:57:03 by ryada            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,7 +21,7 @@ char *get_next_line(int fd)
     char *temp;
 
     if (fd < 0 || BUFFER_SIZE <= 0 || read(fd, 0, 0) < 0)
-		return (NULL);
+		return (free(remainder), remainder = NULL, NULL);
     while ((bytes_read = read(fd, buffer, BUFFER_SIZE)) > 0)
     {
         buffer[bytes_read] = '\0';
@@ -30,6 +30,8 @@ char *get_next_line(int fd)
         temp = remainder;
         remainder = ft_strjoin(remainder, buffer);
         free (temp);
+        if (!remainder)
+            return (NULL);
         // printf("Remainder after strjoin: '%s'\n", remainder);//test
         while (ft_find_line_end(remainder) != -1)
         {
