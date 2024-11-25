@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   get_next_line.c                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ryada <ryada@student.42.fr>                +#+  +:+       +#+        */
+/*   By: rei <rei@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/20 12:17:42 by ryada             #+#    #+#             */
-/*   Updated: 2024/11/25 15:57:03 by ryada            ###   ########.fr       */
+/*   Updated: 2024/11/25 22:09:52 by rei              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,51 +15,58 @@
 char *get_next_line(int fd)
 {
     static char *remainder;
-    char buffer[BUFFER_SIZE + 1];
     char *current_line;
-    ssize_t bytes_read;
-    char *temp;
 
-    if (fd < 0 || BUFFER_SIZE <= 0 || read(fd, 0, 0) < 0)
-		return (free(remainder), remainder = NULL, NULL);
-    while ((bytes_read = read(fd, buffer, BUFFER_SIZE)) > 0)
-    {
-        buffer[bytes_read] = '\0';
-        // printf("Buffer read: '%s'\n", buffer);//test
-        // printf("Remainder before strjoin: '%s'\n", remainder ? remainder : "(null)");//test
-        temp = remainder;
-        remainder = ft_strjoin(remainder, buffer);
-        free (temp);
-        if (!remainder)
-            return (NULL);
-        // printf("Remainder after strjoin: '%s'\n", remainder);//test
-        while (ft_find_line_end(remainder) != -1)
-        {
-            current_line = ft_extract_current_line(remainder);
-            // printf("Current line extracted: '%s'\n", current_line);//test
-            remainder = ft_update_data(remainder);
-            // printf("Remainder after update: '%s'\n", remainder ? remainder : "(null)");//test
-            return (current_line);
-        }
-    }
-    if (bytes_read == -1)
-    {
-        free(remainder);
-        remainder = NULL;
-        return NULL;
-    }
-    if (remainder && *remainder)
-    {
-        current_line = ft_extract_current_line(remainder);
-        // printf("Final current line: '%s'\n", current_line);//test
-        free(remainder);
-        remainder = NULL;
-        return (current_line);
-    }
-    free(remainder);
-    remainder = NULL;
-    return (NULL);
+    if (fd < 0 || BUFFER_SIZE <= 0)
+        return (NULL);
+    remainder = ft_read_update_remainder(fd, remainder);
+    if (!remainder)
+        return (NULL);
+    current_line = ft_extract_current_line(remainder);
+    remainder = ft_update_data(remainder);
+    return (current_line);
 }
+
+// char *get_next_line(int fd)
+// {
+//     static char *remainder;
+//     char buffer[BUFFER_SIZE + 1];
+//     char *current_line;
+//     ssize_t bytes_read;
+//     char *temp;
+
+//     if (fd < 0 || BUFFER_SIZE <= 0 || read(fd, 0, 0) < 0)
+// 		return (free(remainder), remainder = NULL, NULL);
+//     while ((bytes_read = read(fd, buffer, BUFFER_SIZE)) > 0)
+//     {
+//         buffer[bytes_read] = '\0';
+//         remainder = ft_join_and_free(remainder, buffer);
+//         if (!remainder)
+//             return (NULL);
+//         while (ft_find_line_end(remainder) != -1)
+//         {
+//             current_line = ft_extract_current_line(remainder);
+//             remainder = ft_update_data(remainder);
+//             return (current_line);
+//         }
+//     }
+//     if (bytes_read == -1)
+//     {
+//         free(remainder);
+//         remainder = NULL;
+//         return NULL;
+//     }
+//     if (remainder && *remainder)
+//     {
+//         current_line = ft_extract_current_line(remainder);
+//         free(remainder);
+//         remainder = NULL;
+//         return (current_line);
+//     }
+//     free(remainder);
+//     remainder = NULL;
+//     return (NULL);
+// }
 
 // char *get_next_line(int fd)
 // {

@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   get_next_line_utils.c                              :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ryada <ryada@student.42.fr>                +#+  +:+       +#+        */
+/*   By: rei <rei@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/20 12:17:46 by ryada             #+#    #+#             */
-/*   Updated: 2024/11/25 15:37:49 by ryada            ###   ########.fr       */
+/*   Updated: 2024/11/25 22:29:32 by rei              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,6 +24,30 @@ size_t	ft_strlen(const char *str)
 	while (str[i])
 		i++;
 	return (i);
+}
+
+void	ft_bzero(void *ptr, size_t num)
+{
+	unsigned char	*byte_ptr;
+
+	byte_ptr = (unsigned char *)ptr;
+	while (num > 0)
+	{
+		*byte_ptr = 0;
+		byte_ptr++;
+		num--;
+	}
+}
+
+void	*ft_calloc(size_t nmemb, size_t size)
+{
+	void	*array;
+
+	array = (void *)malloc(nmemb * size);
+	if (!array)
+		return (NULL);
+	ft_bzero(array, (nmemb * size));
+	return (array);
 }
 
 size_t ft_strlcpy(char *dst, const char *src, size_t dstsize)
@@ -121,51 +145,161 @@ char *ft_extract_current_line(char *str)
     return (current_line);
 }
 
-char *ft_update_data(char *remainder)
+
+char *ft_join_and_free(char *text, char *buffer)
 {
-    char *new_remainder;
-    int end;
-    int i;
-    
-    if (!remainder)
+    char *temp;
+
+    temp = ft_strjoin(text, buffer);
+    if (!temp)
+    {
+        free(text);
         return (NULL);
-    end = ft_find_line_end(remainder);
-    if (end == -1 || remainder[end + 1] == '\0')
+    }
+    free(text);
+    return (temp);
+}
+
+char	*ft_strchr(const char *s, int c)
+{
+	unsigned char	target;
+	int				i;
+
+	target = (unsigned char)c;
+	i = 0;
+	while (s[i] != '\0')
+	{
+		if ((unsigned char)s[i] == target)
+			return ((char *)&s[i]);
+		i++;
+	}
+	if (target == '\0')
+		return ((char *)&s[i]);
+	return (NULL);
+}
+char *ft_read_update_remainder(int fd, char *remainder)
+{
+    char buffer[BUFFER_SIZE + 1];
+    int bytes_read;
+
+    if (!remainder)
+    {
+        remainder = ft_calloc(1, 1);
+        if (!remainder)
+            return (NULL); // Handle allocation failure
+    }
+
+    while ((bytes_read = read(fd, buffer, BUFFER_SIZE)) > 0)
+    {
+        buffer[bytes_read] = '\0';
+        remainder = ft_join_and_free(remainder, buffer);
+        if (!remainder)
+            return (NULL); // Handle malloc failure
+        if (ft_strchr(remainder, '\n'))
+            break; // Stop reading once a newline is found
+    }
+
+    if (bytes_read == 0 && remainder && *remainder == '\0') // Handle empty remainder
     {
         free(remainder);
         return (NULL);
     }
-    new_remainder = (char *)malloc(sizeof(char) * (ft_strlen(remainder) - end));
-    if (!new_remainder)
+
+    if (bytes_read == -1) // Handle read errors
     {
-        free (remainder);
+        free(remainder);
         return (NULL);
     }
-    i = 0;
-    end++;
-    while (remainder[end])
-        new_remainder[i++] = remainder[end++];
-    new_remainder[i] = '\0';
+
+    return (remainder);
+}
+
+char *ft_update_data(char *remainder)
+{
+    char *new_remainder;
+    int end;
+
+    if (!remainder)
+        return (NULL);
+
+    end = ft_find_line_end(remainder);
+    if (end == -1 || remainder[end + 1] == '\0') // No remaining data
+    {
+        free(remainder);
+        return (NULL);
+    }
+
+    new_remainder = ft_calloc(1, ft_strlen(remainder) - end);
+    if (!new_remainder)
+    {
+        free(remainder);
+        return (NULL); // Handle allocation failure
+    }
+
+    ft_strlcpy(new_remainder, &remainder[end + 1], ft_strlen(&remainder[end + 1]) + 1);
     free(remainder);
-    // printf("New remainder after update: '%s'\n", new_remainder);
+
+    if (!*new_remainder) // Free empty new_remainder
+    {
+        free(new_remainder);
+        return (NULL);
+    }
+
     return (new_remainder);
 }
 
-// void ft_free_remained_data(char **data)
+
+// char *ft_read_update_remainder(int fd, char *remainder)
 // {
-//     if (*data) {
-//         free(*data);
-//         *data = NULL;
+//     char buffer[BUFFER_SIZE + 1];
+//     int bytes_read;
+
+//     if (!remainder)
+//         return (NULL);
+//     while ((bytes_read = read(fd, buffer, BUFFER_SIZE)) > 0)
+//     {
+//         buffer[bytes_read] = '\0';
+//         remainder = ft_join_and_free(remainder, buffer);
+//         if (ft_strchr(remainder, '\n'))
+//         {
+//             free (remainder);
+//             return (NULL);
+//         }
 //     }
+//     if (bytes_read == 0 && remainder && *remainder == '\0')
+//     {
+//         free (remainder);
+//         return (NULL);
+//     }
+//     if (bytes_read == -1)
+//     {
+//         free(remainder);
+//         return (NULL);
+//     }
+//     return(remainder);
 // }
 
-
-// int main(void)
+// char *ft_update_data(char *remainder)
 // {
-//     char str[] = "HELLO\nKONNICHIWA\nBONJOUR";
-//     int i = 5;
-//     char *result = ft_update_data(str, i);
-//     printf ("%s\n", result);
-//     free (result);
-//     return (0);
+//     char *new_remainder;
+//     int end;
+    
+//     if (!remainder)
+//         return (NULL);
+//     end = ft_find_line_end(remainder);
+//     if (end == -1 || remainder[end + 1] == '\0')
+//     {
+//         free(remainder);
+//         return (NULL);
+//     }
+//     new_remainder = ft_calloc(1, ft_strlen(remainder) - end);
+//     if (!new_remainder || !*new_remainder)
+//     {
+//         free (remainder);
+//         free (new_remainder);
+//         return (NULL);
+//     }
+//     ft_strlcpy(new_remainder, &remainder[end + 1], ft_strlen(&remainder[end + 1]) + 1);
+//     free(remainder);
+//     return (new_remainder);
 // }
