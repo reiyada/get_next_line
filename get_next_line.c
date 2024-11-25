@@ -6,7 +6,7 @@
 /*   By: rei <rei@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/20 12:17:42 by ryada             #+#    #+#             */
-/*   Updated: 2024/11/22 00:44:13 by rei              ###   ########.fr       */
+/*   Updated: 2024/11/25 12:21:41 by rei              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,68 +14,120 @@
 
 char *get_next_line(int fd)
 {
-    static char *remained_data;
+    static char *remainder;
     char buffer[BUFFER_SIZE + 1];
-    ssize_t bytes_read; //bc it can be negative when there is an error
-    int line_end;
     char *current_line;
+    ssize_t bytes_read;
     char *temp;
-    
-    if (fd < 0 || BUFFER_SIZE <= 0)
-        return (NULL);
-    if (!remained_data)
-    {
-        remained_data = (char *)malloc(1);
-        if (!remained_data)
-            return NULL;
-        remained_data[0] = '\0';
-    }
+
+    if (fd < 0 || BUFFER_SIZE <= 0 || read(fd, 0, 0) < 0)
+		return (NULL);
     while ((bytes_read = read(fd, buffer, BUFFER_SIZE)) > 0)
     {
         buffer[bytes_read] = '\0';
-        temp = remained_data;
-        remained_data = ft_strjoin(remained_data, buffer);
+        // printf("Buffer read: '%s'\n", buffer);//test
+        // printf("Remainder before strjoin: '%s'\n", remainder ? remainder : "(null)");//test
+        temp = remainder;
+        remainder = ft_strjoin(remainder, buffer);
         free (temp);
-        while ((line_end = ft_find_line_end(remained_data)) >= 0)
+        // printf("Remainder after strjoin: '%s'\n", remainder);//test
+        while (ft_find_line_end(remainder) != -1)
         {
-            current_line = ft_extract_current_line(remained_data, line_end);
-            remained_data = ft_update_data(remained_data, line_end);
-            return current_line;
+            current_line = ft_extract_current_line(remainder);
+            // printf("Current line extracted: '%s'\n", current_line);//test
+            remainder = ft_update_data(remainder);
+            // printf("Remainder after update: '%s'\n", remainder ? remainder : "(null)");//test
+            return (current_line);
         }
     }
-    if (bytes_read < 0)
+    if (bytes_read == -1)
     {
-        ft_free_remained_data(&remained_data);
+        free(remainder);
+        remainder = NULL;
         return NULL;
     }
-    if (remained_data && *remained_data)
+    if (remainder && *remainder)
     {
-        current_line = remained_data;
-        remained_data = NULL;
-        return current_line;
+        current_line = ft_extract_current_line(remainder);
+        // printf("Final current line: '%s'\n", current_line);//test
+        free(remainder);
+        remainder = NULL;
+        return (current_line);
     }
-    ft_free_remained_data(&remained_data);
-    return NULL;
+    free(remainder);
+    remainder = NULL;
+    return (NULL);
 }
+
+// char *get_next_line(int fd)
+// {
+//     static char *remained_data;
+//     char buffer[BUFFER_SIZE + 1];
+//     ssize_t bytes_read; //bc it can be negative when there is an error
+//     int line_end;
+//     char *current_line;
+//     char *temp;
+//     if (fd < 0 || BUFFER_SIZE <= 0)
+//         return (NULL);
+//     // if (!remained_data)
+//     // {
+//     //     remained_data = (char *)malloc(1);
+//     //     if (!remained_data)
+//     //         return NULL;
+//     //     remained_data[0] = '\0';
+//     // }
+//     while ((bytes_read = read(fd, buffer, BUFFER_SIZE)) > 0)
+//     {
+//         buffer[bytes_read] = '\0';
+//         temp = remained_data;
+//         remained_data = ft_strjoin(remained_data, buffer);
+//         free (temp);
+//         while ((line_end = ft_find_line_end(remained_data)) >= 0)
+//         {
+//             current_line = ft_extract_current_line(remained_data, line_end);
+//             remained_data = ft_update_data(remained_data, line_end);
+//             return current_line;
+//         }
+//     }
+//     if (bytes_read < 0)
+//     {
+//         ft_free_remained_data(&remained_data);       
+//         return (NULL);
+//     }
+//     if (remained_data && *remained_data)
+//     {
+//         current_line = remained_data;
+//         remained_data = NULL;
+//         return current_line;
+//     }
+//     ft_free_remained_data(&remained_data);
+//     return NULL;
+// }
 
 // int main(void)
 // {
-//     int fd = open("test.txt", O_RDONLY);
+//     int fd;
+//     char *line;
+
+//     // Open the file "test.txt" in read-only mode
+//     fd = open("test.txt", O_RDONLY);
 //     if (fd < 0)
 //     {
 //         perror("Error opening file");
-//         return 1;
+//         return (1);
 //     }
 
-//     char *line;
+//     // Read lines from the file using get_next_line
 //     while ((line = get_next_line(fd)) != NULL)
 //     {
-//         printf("%s", line);
-//         free(line); // Free the allocated memory after use
+//         printf("Line: '%s'\n", line);
+//         free(line); // Free the line after printing
 //     }
 
+//     // Close the file descriptor
 //     close(fd);
-//     return 0;
+
+//     return (0);
 // }
 
 // int main(void)
@@ -84,7 +136,6 @@ char *get_next_line(int fd)
 //     char buffer[BUFFER_SIZE];
 //     ssize_t bytes_read;
 //     char *new_line;
-
 //     fd = open("test.txt",O_RDONLY);
 //     if (fd < 0)
 //     {

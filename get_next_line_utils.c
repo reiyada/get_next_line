@@ -6,7 +6,7 @@
 /*   By: rei <rei@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/20 12:17:46 by ryada             #+#    #+#             */
-/*   Updated: 2024/11/22 00:36:17 by rei              ###   ########.fr       */
+/*   Updated: 2024/11/25 12:23:43 by rei              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -64,60 +64,117 @@ int ft_find_line_end(char *str)
     i = 0;
     while (str[i])
     {
-        if(str[i] == '\n' || str[i] == '\0')
-            return i;
+        if(str[i] == '\n')
+        {
+            return (i);
+        }
         i++;
     }
     return (-1);
 }
 
-char *ft_extract_current_line(char *str, int line_end)
+char *ft_extract_current_line(char *str)
 {
     char *current_line;
     int i;
-    
-    current_line = (char *)malloc(sizeof(char) * (line_end + 2));
+    int end;
+
+    i = 0;
+    end = ft_find_line_end(str);
+    if (end == -1)
+        end = ft_strlen(str);
+    current_line = (char *)malloc(sizeof(char) * (end + 2));
     if (!current_line)
         return (NULL);
-    i = 0;
-    while (i <= line_end)
+    while (i < end && str[i])
     {
         current_line[i] = str[i];
         i++;
     }
+    if (str[i] == '\n')
+        current_line[i++] = '\n';
     current_line[i] = '\0';
     return (current_line);
 }
 
-char *ft_update_data(char *remained_data, int line_end)
+// char *ft_extract_current_line(char *str, int line_end)
+// {
+//     char *current_line;
+//     int i;
+    
+//     current_line = (char *)malloc(sizeof(char) * (line_end + 1));
+//     if (!current_line)
+//         return (NULL);
+//     i = 0;
+//     while (i <= line_end)
+//     {
+//         current_line[i] = str[i];
+//         i++;
+//     }
+//     current_line[i] = '\0';
+//     return (current_line);
+// }
+
+// char *ft_update_data(char *remained_data, int line_end)
+// {
+//     int i;
+//     char *new_data;
+
+//     if (!remained_data || !remained_data[line_end + 1])
+//     {
+//         free(remained_data);
+//         return (NULL);
+//     }
+//     new_data = (char *)malloc(ft_strlen(remained_data + line_end + 1) + 1);
+//     if (!new_data)
+//         return (NULL);
+//     line_end++;
+//     i = 0;
+//     while (remained_data[line_end + 1])
+//         new_data[i++] = remained_data[line_end++];
+//     new_data[i] = '\0';
+//     free(remained_data);
+//     return (new_data);
+// }
+
+
+char *ft_update_data(char *remainder)
 {
+    char *new_remainder;
+    int end;
     int i;
-    char *new_data;
-
-    if (!remained_data || !remained_data[line_end + 1])
+    
+    end = ft_find_line_end(remainder);
+    if (end == -1)
     {
-        free(remained_data);
+        free(remainder);
         return (NULL);
     }
-    new_data = (char *)malloc(ft_strlen(remained_data + line_end + 1) + 1);
-    if (!new_data)
+    if (remainder[end + 1] == '\0')
+    {
+        free(remainder);
         return (NULL);
-    line_end++;
+    }
+    new_remainder = (char *)malloc(sizeof(char) * (ft_strlen(remainder) - end));
+    if (!new_remainder)
+        return (NULL);
     i = 0;
-    while (remained_data[line_end])
-        new_data[i++] = remained_data[line_end++];
-    new_data[i] = '\0';
-    free(remained_data);
-    return (new_data);
+    end++;
+    while (remainder[end])
+        new_remainder[i++] = remainder[end++];
+    new_remainder[i] = '\0';
+    free(remainder);
+    // printf("New remainder after update: '%s'\n", new_remainder);
+    return (new_remainder);
 }
 
-void ft_free_remained_data(char **data)
-{
-    if (*data) {
-        free(*data);
-        *data = NULL;
-    }
-}
+// void ft_free_remained_data(char **data)
+// {
+//     if (*data) {
+//         free(*data);
+//         *data = NULL;
+//     }
+// }
 
 
 // int main(void)
