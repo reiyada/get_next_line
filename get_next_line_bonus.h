@@ -1,17 +1,17 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   get_next_line.h                                    :+:      :+:    :+:   */
+/*   get_next_line_bonus.h                              :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: ryada <ryada@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/11/20 12:17:39 by ryada             #+#    #+#             */
-/*   Updated: 2024/11/26 14:12:38 by ryada            ###   ########.fr       */
+/*   Created: 2024/11/26 14:21:38 by ryada             #+#    #+#             */
+/*   Updated: 2024/11/26 14:24:50 by ryada            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#ifndef GET_NEXT_LINE_H
-# define GET_NEXT_LINE_H
+#ifndef GET_NEXT_LINE_BONUS_H
+# define GET_NEXT_LINE_BONUS_H
 
 # include <stdlib.h>
 # include <stddef.h>
@@ -19,6 +19,7 @@
 # include <unistd.h>
 # include <stdarg.h>
 # include <fcntl.h>
+# define MAX_FD 1024
 
 char	*get_next_line(int fd);
 char	*ft_strjoin(char const *s1, char const *s2);

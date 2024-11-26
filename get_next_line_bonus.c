@@ -1,16 +1,16 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   get_next_line.c                                    :+:      :+:    :+:   */
+/*   get_next_line_bonus.c                              :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: ryada <ryada@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/11/20 12:17:42 by ryada             #+#    #+#             */
-/*   Updated: 2024/11/26 13:59:38 by ryada            ###   ########.fr       */
+/*   Created: 2024/11/26 14:21:41 by ryada             #+#    #+#             */
+/*   Updated: 2024/11/26 14:31:53 by ryada            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "get_next_line.h"
+#include "get_next_line_bonus.h"
 
 char	*ft_extract_current_line(char *str)
 {
@@ -95,27 +95,15 @@ char	*ft_update_data(char *remainder)
 
 char	*get_next_line(int fd)
 {
-	static char	*remainder;
+	static char	*remainders[MAX_FD];
 	char		*current_line;
 
-	if (fd < 0 || BUFFER_SIZE <= 0)
+	if (fd < 0 || BUFFER_SIZE <= 0 || fd >= MAX_FD)
 		return (NULL);
-	remainder = ft_read_update_remainder(fd, remainder);
-	if (!remainder)
+	remainders[fd] = ft_read_update_remainder(fd, remainders[fd]);
+	if (!remainders[fd])
 		return (NULL);
-	current_line = ft_extract_current_line(remainder);
-	remainder = ft_update_data(remainder);
+	current_line = ft_extract_current_line(remainders[fd]);
+	remainders[fd] = ft_update_data(remainders[fd]);
 	return (current_line);
 }
-
-// read(fd, buffer, BUFFER_SIZE):
-//Reads up to BUFFER_SIZE bytes from the file associated
-//with the file descriptor fd into the buffer.
-//Returns the number of bytes actually read (bytesRead).
-//Positive value: Number of bytes successfully read.
-//0: End of file (EOF).
-//-1: An error occurred.
-
-// STDOUT_FILENO is standard output(write)
-// STDIN_FILENO is standard input(write)
-// STDERR_FILENO is standard error(write)
