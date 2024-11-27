@@ -6,7 +6,7 @@
 /*   By: rei <rei@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/26 14:21:41 by ryada             #+#    #+#             */
-/*   Updated: 2024/11/27 20:02:08 by rei              ###   ########.fr       */
+/*   Updated: 2024/11/27 20:11:01 by rei              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -108,22 +108,22 @@ char	*get_next_line(int fd)
 	char		*buffer;
 	char		*line;
 
-	if (fd < 0 || BUFFER_SIZE <= 0)
+	if (fd < 0 || BUFFER_SIZE <= 0 || fd >= MAX_FD)
 		return (NULL);
 	buffer = malloc(BUFFER_SIZE + 1);
 	if (!buffer)
 		return (NULL);
-	if (!*remainder)
+	if (!remainder[fd])
 	{
-		*remainder = ft_strdup("");
-		if (!*remainder)
+		remainder[fd] = ft_strdup("");
+		if (!remainder[fd])
 			return (free(buffer), NULL);
 	}
-	*remainder = ft_read_and_update_remainder(fd, *remainder, buffer);
-	if (!*remainder)
+	remainder[fd] = ft_read_and_update_remainder(fd, remainder[fd], buffer);
+	if (!remainder[fd])
 		return (free(buffer), NULL);
-	line = ft_extract_line_from_remainder(remainder);
+	line = ft_extract_line_from_remainder(&remainder[fd]);
 	if (line)
 		return (free(buffer), line);
-	return (ft_finalize_line(remainder, buffer));
+	return (ft_finalize_line(&remainder[fd], buffer));
 }
