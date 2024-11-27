@@ -3,119 +3,127 @@
 /*                                                        :::      ::::::::   */
 /*   get_next_line.c                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ryada <ryada@student.42.fr>                +#+  +:+       +#+        */
+/*   By: rei <rei@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/20 12:17:42 by ryada             #+#    #+#             */
-/*   Updated: 2024/11/26 13:59:38 by ryada            ###   ########.fr       */
+/*   Updated: 2024/11/27 19:51:00 by rei              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "get_next_line.h"
 
-char	*ft_extract_current_line(char *str)
+int	ft_read_into_buffer(int fd, char *buffer)
 {
-	char	*current_line;
-	int		end;
+	int	bytes_read;
 
-	if (!str || *str == '\0')
-		return (NULL);
-	end = ft_find_line_end(str);
-	if (end == -1)
-		end = ft_strlen(str);
-	current_line = (char *)malloc(sizeof(char) * (end + 2));
-	if (!current_line)
-		return (NULL);
-	ft_strlcpy(current_line, str, end + 2);
-	return (current_line);
+	bytes_read = read(fd, buffer, BUFFER_SIZE);
+	if (bytes_read == -1)
+		return (-1);
+	if (bytes_read > 0)
+		buffer[bytes_read] = '\0';
+	return (bytes_read);
 }
 
-char	*ft_join_and_free(char *text, char *buffer)
+char	*ft_read_and_update_remainder(int fd, char *remainder, char *buffer)
 {
+	int		bytes_read;
 	char	*temp;
 
-	temp = ft_strjoin(text, buffer);
-	if (!temp)
-	{
-		free(text);
-		return (NULL);
-	}
-	free(text);
-	return (temp);
-}
-
-char	*ft_read_update_remainder(int fd, char *remainder)
-{
-	char	buffer[BUFFER_SIZE + 1];
-	int		bytes_read;
-
-	if (!remainder)
-	{
-		remainder = malloc(sizeof(char));
-		if (!remainder)
-			return (NULL);
-		remainder[0] = '\0';
-	}
-	bytes_read = read(fd, buffer, BUFFER_SIZE);
+	temp = NULL;
+	bytes_read = 1;
 	while (bytes_read > 0)
 	{
+		bytes_read = read(fd, buffer, BUFFER_SIZE);
+		if (bytes_read <= 0)
+			break ;
 		buffer[bytes_read] = '\0';
-		remainder = ft_join_and_free(remainder, buffer);
-		if (!remainder)
-			return (NULL);
+		temp = ft_strjoin(remainder, buffer);
+		if (!temp)
+			return (free(remainder), NULL);
+		free(remainder);
+		remainder = temp;
 		if (ft_strchr(remainder, '\n'))
 			break ;
-		bytes_read = read(fd, buffer, BUFFER_SIZE);
 	}
-	if (bytes_read == -1 || (remainder && *remainder == '\0'))
-		return (free(remainder), NULL);
+	if (bytes_read < 0)
+	{
+		free(remainder);
+		remainder = NULL;
+	}
 	return (remainder);
 }
 
-char	*ft_update_data(char *remainder)
+char	*ft_extract_line_from_remainder(char **remainder)
 {
-	char	*new_remainder;
-	int		end;
-	size_t	new_len;
+	char	*line;
+	char	*newline_ptr;
+	char	*temp;
+	size_t	line_length;
 
-	if (!remainder)
+	newline_ptr = ft_strchr(*remainder, '\n');
+	if (!newline_ptr)
 		return (NULL);
-	end = ft_find_line_end(remainder);
-	if (end == -1 || remainder[end + 1] == '\0')
-		return (free(remainder), NULL);
-	new_len = ft_strlen(remainder) - end;
-	new_remainder = malloc(new_len * sizeof(char));
-	if (!new_remainder)
-		return (free(remainder), NULL);
-	ft_strlcpy(new_remainder, &remainder[end + 1], new_len);
-	free(remainder);
-	if (!*new_remainder)
-		return (free(new_remainder), NULL);
-	return (new_remainder);
+	line_length = newline_ptr - *remainder + 1;
+	line = (char *)malloc(sizeof(char) * (line_length + 1));
+	if (!line)
+		return (NULL);
+	ft_strlcpy(line, *remainder, line_length + 1);
+	temp = ft_strdup(newline_ptr + 1);
+	if (!temp)
+		return (free(line), NULL);
+	free(*remainder);
+	*remainder = temp;
+	if ((*remainder)[0] == '\0')
+	{
+		free(*remainder);
+		*remainder = NULL;
+	}
+	return (line);
+}
+
+char	*ft_finalize_line(char **remainder, char *buffer)
+{
+	char	*line;
+
+	if (*remainder && **remainder)
+	{
+		line = ft_strdup(*remainder);
+		if (!line)
+		{
+			free(*remainder);
+			*remainder = NULL;
+		}
+	}
+	else
+		line = NULL;
+	free(*remainder);
+	*remainder = NULL;
+	free(buffer);
+	return (line);
 }
 
 char	*get_next_line(int fd)
 {
 	static char	*remainder;
-	char		*current_line;
+	char		*buffer;
+	char		*line;
 
 	if (fd < 0 || BUFFER_SIZE <= 0)
 		return (NULL);
-	remainder = ft_read_update_remainder(fd, remainder);
-	if (!remainder)
+	buffer = malloc(BUFFER_SIZE + 1);
+	if (!buffer)
 		return (NULL);
-	current_line = ft_extract_current_line(remainder);
-	remainder = ft_update_data(remainder);
-	return (current_line);
+	if (!remainder)
+	{
+		remainder = ft_strdup("");
+		if (!remainder)
+			return (free(buffer), NULL);
+	}
+	remainder = ft_read_and_update_remainder(fd, remainder, buffer);
+	if (!remainder)
+		return (free(buffer), NULL);
+	line = ft_extract_line_from_remainder(&remainder);
+	if (line)
+		return (free(buffer), line);
+	return (ft_finalize_line(&remainder, buffer));
 }
-
-// read(fd, buffer, BUFFER_SIZE):
-//Reads up to BUFFER_SIZE bytes from the file associated
-//with the file descriptor fd into the buffer.
-//Returns the number of bytes actually read (bytesRead).
-//Positive value: Number of bytes successfully read.
-//0: End of file (EOF).
-//-1: An error occurred.
-
-// STDOUT_FILENO is standard output(write)
-// STDIN_FILENO is standard input(write)
-// STDERR_FILENO is standard error(write)

@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   get_next_line_bonus.h                              :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ryada <ryada@student.42.fr>                +#+  +:+       +#+        */
+/*   By: rei <rei@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/26 14:21:38 by ryada             #+#    #+#             */
-/*   Updated: 2024/11/26 14:24:50 by ryada            ###   ########.fr       */
+/*   Updated: 2024/11/27 19:56:04 by rei              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,17 +21,17 @@
 # include <fcntl.h>
 # define MAX_FD 1024
 
+int		ft_read_into_buffer(int fd, char *buffer);
+
 char	*get_next_line(int fd);
-char	*ft_strjoin(char const *s1, char const *s2);
-char	*ft_extract_current_line(char *str);
-char	*ft_update_data(char *str);
-char	*ft_join_and_free(char *text, char *buffer);
-char	*ft_read_update_remainder(int fd, char *remainder);
 char	*ft_strchr(const char *s, int c);
+char	*ft_strjoin(char const *s1, char const *s2);
+char	*ft_strdup(const char *src);
+char	*ft_read_and_update_remainder(int fd, char *remainder, char *buffer);
+char	*ft_extract_line_from_remainder(char **remainder);
+char	*ft_finalize_line(char **remainder, char *buffer);
 
-int		ft_find_line_end(char *str);
-
+size_t	ft_strlcpy(char *dest, const char *src, size_t dest_size);
 size_t	ft_strlen(const char *str);
-size_t	ft_strlcpy(char *dst, const char *src, size_t dstsize);
 
 #endif
