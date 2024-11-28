@@ -3,25 +3,33 @@
 /*                                                        :::      ::::::::   */
 /*   get_next_line_bonus.h                              :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: rei <rei@student.42.fr>                    +#+  +:+       +#+        */
+/*   By: ryada <ryada@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/11/26 14:21:38 by ryada             #+#    #+#             */
-/*   Updated: 2024/11/27 19:56:04 by rei              ###   ########.fr       */
+/*   Created: 2024/11/28 08:26:20 by ryada             #+#    #+#             */
+/*   Updated: 2024/11/28 12:27:30 by ryada            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef GET_NEXT_LINE_BONUS_H
 # define GET_NEXT_LINE_BONUS_H
 
+# if !BUFFER_SIZE
+#  define BUFFER_SIZE 1000
+# endif
+
+# if BUFFEER_SIZE < 1
+#  undef BUFFER_SIZE
+#  define BUFFER_SIZE 1
+# elif BUFFER_SIZE > 8000000
+#  undef BUFFER_SIZE
+#  define BUFFEER_SIZE 8000000
+# endif
+
 # include <stdlib.h>
-# include <stddef.h>
 # include <stdio.h>
 # include <unistd.h>
-# include <stdarg.h>
 # include <fcntl.h>
 # define MAX_FD 1024
-
-int		ft_read_into_buffer(int fd, char *buffer);
 
 char	*get_next_line(int fd);
 char	*ft_strchr(const char *s, int c);

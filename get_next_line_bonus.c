@@ -3,26 +3,14 @@
 /*                                                        :::      ::::::::   */
 /*   get_next_line_bonus.c                              :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: rei <rei@student.42.fr>                    +#+  +:+       +#+        */
+/*   By: ryada <ryada@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/11/26 14:21:41 by ryada             #+#    #+#             */
-/*   Updated: 2024/11/27 20:11:01 by rei              ###   ########.fr       */
+/*   Created: 2024/11/28 08:26:11 by ryada             #+#    #+#             */
+/*   Updated: 2024/11/28 11:14:09 by ryada            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "get_next_line_bonus.h"
-
-int	ft_read_into_buffer(int fd, char *buffer)
-{
-	int	bytes_read;
-
-	bytes_read = read(fd, buffer, BUFFER_SIZE);
-	if (bytes_read == -1)
-		return (-1);
-	if (bytes_read > 0)
-		buffer[bytes_read] = '\0';
-	return (bytes_read);
-}
 
 char	*ft_read_and_update_remainder(int fd, char *remainder, char *buffer)
 {
@@ -126,4 +114,67 @@ char	*get_next_line(int fd)
 	if (line)
 		return (free(buffer), line);
 	return (ft_finalize_line(&remainder[fd], buffer));
+}
+int main(int argc, char **argv)
+{
+	int		fd1, fd2, fd3;
+	char	*line1, *line2, *line3;
+	int		i;
+
+	if (argc == 4)
+	{
+		fd1 = open(argv[1], O_RDONLY);
+		fd2 = open(argv[2], O_RDONLY);
+		fd3 = open(argv[3], O_RDONLY);
+
+		if (fd1 < 0 || fd2 < 0 || fd3 < 0)
+		{
+			perror("Error opening files");
+			if (fd1 >= 0) close(fd1);
+			if (fd2 >= 0) close(fd2);
+			if (fd3 >= 0) close(fd3);
+			return (1);
+		}
+		i = 1;
+		while (1)
+		{
+			line1 = get_next_line(fd1);
+			line2 = get_next_line(fd2);
+			line3 = get_next_line(fd3);
+
+			if (!line1 && !line2 && !line3)
+				break;
+			if (line1)
+			{
+				printf("File 1, Line %d: %s", i, line1);
+				if (line1[ft_strlen(line1) - 1] != '\n')
+					printf("\n");
+				free(line1);
+			}
+			if (line2)
+			{
+				printf("File 2, Line %d: %s", i, line2);
+				if (line2[ft_strlen(line2) - 1] != '\n')
+					printf("\n");
+				free(line2);
+			}
+			if (line3)
+			{
+				printf("File 3, Line %d: %s", i, line3);
+				if (line3[ft_strlen(line3) - 1] != '\n')
+					printf("\n");
+				free(line3);
+			}
+			i++;
+		}
+	}
+	else
+	{
+		perror("Put 4 arguments.\n");
+		return (1);
+	}
+	close(fd1);
+	close(fd2);
+	close(fd3);
+	return (0);
 }
