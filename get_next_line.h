@@ -6,14 +6,14 @@
 /*   By: ryada <ryada@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/28 08:26:56 by ryada             #+#    #+#             */
-/*   Updated: 2024/11/28 12:27:40 by ryada            ###   ########.fr       */
+/*   Updated: 2024/11/28 12:46:23 by ryada            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef GET_NEXT_LINE_H
 # define GET_NEXT_LINE_H
 
-# if !BUFFER_SIZE
+# ifndef BUFFER_SIZE
 #  define BUFFER_SIZE 1000
 # endif
 
